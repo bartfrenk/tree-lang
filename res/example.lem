@@ -1,0 +1,17 @@
+
+case $creative.size
+  (640, 480):
+    case $geo.city
+      'Amsterdam':
+        pancake = 'amsterdam-pancake.png'
+      'Paris':
+        pancake = 'paris-pancake.png';
+        background = 'eiffel-tower.png'
+  default:
+    pancake = 'small-pancake.png'
+
+case $time.part
+  'evening':
+    title = 'Good evening!'
+  default:
+    title = 'Good day!'
