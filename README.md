@@ -36,4 +36,4 @@ Administration for the project is kept in a separate org-mode document:
 
 1. Benjamin C. Pierce. *Types and programming languages*. The MIT press. 2002.
 2. Stephen Diehl. *Implementing a JIT compiled language with Haskell and
-   LLVM*. http://www.stephendiehl.com/llvm/
+   LLVM*. 2017. http://www.stephendiehl.com/llvm/
