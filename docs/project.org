@@ -11,3 +11,20 @@ Maybe use {} interpolation syntax, e.g., "Welcome to {$location.city}!"
 We need to have an entry in the type context for all the fields of the context
 macros in the program. Such entries are just trees with the types at the
 leaves.
+** Ideas
+*** Haxl interpreter
+Write an interpreter from programs into the Haxl monad. It would then probably
+be wise to define data sources for every top-level context macro name. The tail
+of the context macro names is then used to access the resulting object.
+
+This would allow for easy concurrent data access.
+*** What about failures to dereference context macros?
+The language should have a good concept of unknowns. Dereferencing the context
+macros might fail.
+*** Can we take into account optimal adaptive placeholder selection into the language?
+This is very preliminary. I am thinking of something like =title = [{"Welcome!",
+"Hey!"}|gender]=, to automatically select the title from the two
+options given based on the gender.
+
+
+
