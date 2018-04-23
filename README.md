@@ -5,6 +5,9 @@
 A (non-Turing complete) language for describing decision trees, with syntax
 similar to Python. Loosely inspired by AppNexus' Bonsai language.
 
+In the future this repo will include an interpreter that executes programs
+inside a monad that allows for easy dereferencing of remote values (which are
+indicated by a $-prefix). See [project.org](docs/project.org) for sketchy details.
 
 ## Example
 
