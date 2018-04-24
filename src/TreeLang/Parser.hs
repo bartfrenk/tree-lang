@@ -33,8 +33,12 @@ term = parens expr
    <?> "term"
 
 table :: CharStream s => OperatorTable s () Identity Expr
-table = [[Infix (op "==" >> (pure $ BinaryOp "==")) AssocNone]
-        ]
+table = [[ Infix (op "==" >> (pure $ BinaryOp "==")) AssocNone
+         , Infix (op "<" >> (pure $ BinaryOp "<")) AssocNone
+         , Infix (op ">" >> (pure $ BinaryOp ">")) AssocNone
+         , Infix (op "<=" >> (pure $ BinaryOp "<=")) AssocNone
+         , Infix (op ">=" >> (pure $ BinaryOp ">=")) AssocNone
+         ]]
 
 expr :: CharStream s => Parser s Expr
 expr = buildExpressionParser table term <?> "expression"

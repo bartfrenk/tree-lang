@@ -41,7 +41,7 @@ data TyContextMacro
 
 tyWeather :: TyContextMacro
 tyWeather = Object $ Map.fromList
-  [ ("temperature", Atom TyInt)
+  [ ("temperature", Atom TyFloat)
   , ("conditions", Atom TyString)
   ]
 
@@ -60,13 +60,30 @@ bad = unlines
   ]
 
 
-good :: String
-good = unlines
-  ["if $weather.temperature == 1:",
+good2 :: String
+good2 = unlines
+  ["if $weather.temperature == 1.0:",
    "    x = 2",
    "    y = 3",
    "elif $weather.conditions == \"rainy\":",
-   "    if $weather.temperature == 3:",
+   "    if $weather.temperature == 3.0:",
+   "        z = 4",
+   "    end",
+   "else:",
+   "    z = 5",
+   "end"
+  ]
+
+
+
+
+good1 :: String
+good1 = unlines
+  ["if $weather.temperature > 1:",
+   "    x = 2",
+   "    y = 3",
+   "elif $weather.conditions == \"rainy\":",
+   "    if $weather.temperature == 3.0:",
    "        z = 4",
    "    end",
    "else:",
@@ -140,15 +157,35 @@ checkExpr _ (ContextMacro []) = throwError $ TypeError "undefined context macro"
 checkExpr ctx (ContextMacro (name:path)) = do
   tyContextMacro <- lookupTyContextMacro ctx name
   lookupTy tyContextMacro path
-checkExpr ctx (BinaryOp "==" e1 e2) = do
+checkExpr ctx (BinaryOp op e1 e2) = do
   t1 <- checkExpr ctx e1
   t2 <- checkExpr ctx e2
-  if t1 == t2
-    then pure TyBool
-    else throwError $ TypeError $
-         "type of expression " ++ show e1 ++ " (" ++ show t1 ++ ") " ++
-         "does not match that of " ++ show e2 ++ " (" ++ show t2 ++ ")"
-checkExpr _ (BinaryOp op _ _) =
-  throwError $ TypeError $ "unknown binary operation " ++ op
+  case operatorType op of
+    Just (Exact ty) ->
+      if t1 == t2
+      then pure ty
+      else throwError $ TypeError $
+           "type of expression " ++ show e1 ++ " (" ++ show t1 ++ ") " ++
+           "does not match that of " ++ show e2 ++ " (" ++ show t2 ++ ")"
+    Just (Numeric ty) ->
+      if isNumeric t1 && isNumeric t2
+      then pure ty
+      else throwError $ TypeError $
+           op ++ " only applies to numeric types"
+    Nothing ->
+      throwError $ TypeError $ "unknown binary operation " ++ op
 
+isNumeric :: Ty -> Bool
+isNumeric TyFloat = True
+isNumeric TyInt = True
+isNumeric _ = False
 
+data OperatorType
+  = Numeric Ty
+  | Exact Ty
+
+operatorType :: String -> Maybe OperatorType
+operatorType op
+  | op `elem` ["=="] = Just (Exact TyBool)
+  | op `elem` ["<", ">", "<=", ">="] = Just (Numeric TyBool)
+  | otherwise = Nothing

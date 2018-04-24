@@ -15,7 +15,7 @@ type CharStream s = Stream s Identity Char
 lexer :: CharStream s => T.GenTokenParser s () Identity
 lexer = T.makeTokenParser style
   where
-    ops = ["+", "*", "-", ";", "=="]
+    ops = ["+", "*", "-", ";", "==", "<", ">", "<=", ">="]
     names = ["if", "then", "else", "end", "elif"]
     style = T.LanguageDef
             { T.commentStart = ""
