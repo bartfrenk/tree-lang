@@ -5,6 +5,10 @@
 A (non-Turing complete) language for describing decision trees, with syntax
 similar to Python. Loosely inspired by AppNexus' Bonsai language.
 
+The language itself is statically typed, and the type checker allows for the
+types of the context macros (the program elements starting with '$') to be
+provided by an external provider.
+
 In the future this repo will include an interpreter that executes programs
 inside a monad that allows for easy dereferencing of remote values (which are
 indicated by a $-prefix). See [project.org](docs/project.org) for sketchy details.
@@ -14,8 +18,10 @@ indicated by a $-prefix). See [project.org](docs/project.org) for sketchy detail
 ```
 if $creative.size == "640x480":
     if $geo.city == "Amsterdam":
-        pancake = "amsterdam-pancake.png"
-        title = "Amsterdam!"
+        if $weather.temperature > 20:
+            pancake = "amsterdam-pancake.png"
+            title = "Summer in Amsterdam!"
+        end
     elif $geo.city == "Paris":
         pancake = "paris-pancake.png"
     else:
