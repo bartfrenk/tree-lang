@@ -7,10 +7,14 @@
 *** TODO Add comparison operators to the language
 *** TODO Add string interpolation
 Maybe use {} interpolation syntax, e.g., "Welcome to {$location.city}!"
-*** TODO Write a typechecker
+*** DONE Write a typechecker
+CLOSED: [2018-04-24 Tue 23:12]
 We need to have an entry in the type context for all the fields of the context
 macros in the program. Such entries are just trees with the types at the
 leaves.
+*** Add data constructors
+**** TODO tuples
+**** TODO lists
 ** Ideas
 *** Haxl interpreter
 Write an interpreter from programs into the Haxl monad. It would then probably
