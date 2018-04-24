@@ -69,3 +69,6 @@ linebreak = void $ char '\n'
 
 colon :: CharStream s => Parser s ()
 colon = lexeme $ op ":" *> skipMany linebreak
+
+float :: CharStream s => Parser s Double
+float = T.float lexer

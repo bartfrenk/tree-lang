@@ -21,15 +21,20 @@ intLiteral = IntLiteral <$> integer
 stringLiteral :: CharStream s => Parser s Expr
 stringLiteral = StringLiteral <$> quoted
 
+floatLiteral :: CharStream s => Parser s Expr
+floatLiteral = FloatLiteral <$> float
+
 term :: CharStream s => Parser s Expr
 term = parens expr
    <|> contextMacro
-   <|> intLiteral
-   <|> stringLiteral
+   <|> try floatLiteral
+   <|> try intLiteral
+   <|> try stringLiteral
    <?> "term"
 
 table :: CharStream s => OperatorTable s () Identity Expr
-table = [[Infix (op "==" >> (pure $ BinaryOp "==")) AssocNone]]
+table = [[Infix (op "==" >> (pure $ BinaryOp "==")) AssocNone]
+        ]
 
 expr :: CharStream s => Parser s Expr
 expr = buildExpressionParser table term <?> "expression"
@@ -89,7 +94,7 @@ u = unlines
 
 w :: String
 w = unlines
-  ["if $u.w == 1:",
+  ["if $u.w == 1.22:",
    "    x = 2",
    "    y = 3",
    "elif $u.w == 2:",
@@ -114,7 +119,7 @@ z = unlines
   ["if $u.w == 1:",
    "    x = 2",
    "    y = 3",
-   "elif $u.w == 2:",
+   "elif $u.w == 2.000:",
    "    z = 4",
    "else:",
    "    z = 5",

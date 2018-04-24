@@ -5,7 +5,6 @@ import Data.Functor.Identity
 import Control.Monad.Except
 import Data.Map (Map, (!?))
 import qualified Data.Map as Map
-import Data.Typeable
 import Data.List (intercalate)
 
 import TreeLang.Syntax
@@ -26,6 +25,7 @@ data Ty
   | TyString
   | TyBool
   | TyUnit
+  | TyFloat
   deriving (Eq)
 
 instance Show Ty where
@@ -33,6 +33,8 @@ instance Show Ty where
   show TyString = "string"
   show TyBool = "bool"
   show TyUnit = "unit"
+  show TyFloat = "float"
+
 
 data TyContextMacro
   = Atom Ty | Object (Map String TyContextMacro)
@@ -133,6 +135,7 @@ checkStatement ctx (Cond guardedClauses mElseClause) = do
 checkExpr :: Monad m => TypeContextT m -> Expr -> ExceptT TypeError m Ty
 checkExpr _ (IntLiteral _) = pure TyInt
 checkExpr _ (StringLiteral _) = pure TyString
+checkExpr _ (FloatLiteral _) = pure TyFloat
 checkExpr _ (ContextMacro []) = throwError $ TypeError "undefined context macro"
 checkExpr ctx (ContextMacro (name:path)) = do
   tyContextMacro <- lookupTyContextMacro ctx name
