@@ -6,7 +6,7 @@ A (non-Turing complete) language for describing decision trees, with syntax
 similar to Python. Loosely inspired by AppNexus' Bonsai language.
 
 The language itself is statically typed, and the type checker allows for the
-types of the context macros (the program elements starting with '$') to be
+types of the context macros (the program elements with prefix `$`) to be
 provided by an external provider.
 
 In the future this repo will include an interpreter that executes programs
