@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
-module TreeLang.Parser where
+module TreeLang.Parser (module TreeLang.Parser,
+                        module Text.Parsec) where
 
 import Text.Show.Pretty
 

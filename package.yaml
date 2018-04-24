@@ -26,7 +26,11 @@ dependencies:
 - parsec
 - indents
 - hspec
+- containers
 - pretty-show
+- mtl
+- exceptions
+
 
 library:
   source-dirs: src
