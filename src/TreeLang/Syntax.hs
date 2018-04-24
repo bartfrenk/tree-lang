@@ -1,5 +1,6 @@
 module TreeLang.Syntax where
 
+import Data.List
 
 type Name = String
 
@@ -18,6 +19,12 @@ data Expr
   | BinaryOp Op Expr Expr
   | IntLiteral Integer
   | StringLiteral String
-  deriving (Eq, Show)
+  deriving (Eq)
+
+instance Show Expr where
+  show (ContextMacro path) = "$" ++ intercalate "." path
+  show (BinaryOp op e1 e2) = show e1 ++ " " ++ show op ++ " " ++ show e2
+  show (IntLiteral i) = show i
+  show (StringLiteral s) = "\"" ++ s ++ "\""
 
 

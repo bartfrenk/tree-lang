@@ -4,7 +4,6 @@ module TreeLang.Checker where
 import Data.Functor.Identity
 import Control.Monad.Except
 import Data.Map (Map, (!?))
-import Control.Monad.Catch
 import qualified Data.Map as Map
 import Data.Typeable
 import Data.List (intercalate)
@@ -27,7 +26,13 @@ data Ty
   | TyString
   | TyBool
   | TyUnit
-  deriving (Eq, Show)
+  deriving (Eq)
+
+instance Show Ty where
+  show TyInt = "int"
+  show TyString = "string"
+  show TyBool = "bool"
+  show TyUnit = "unit"
 
 data TyContextMacro
   = Atom Ty | Object (Map String TyContextMacro)
@@ -79,7 +84,8 @@ data TypeContextT m
 lookupTyContextMacro :: Monad m => TypeContextT m -> String -> ExceptT TypeError m TyContextMacro
 lookupTyContextMacro (TypeContextT m) name =
   case m !? name of
-    Nothing -> throwError $ TypeError $ "could not find context macro object " ++ name
+    Nothing -> throwError $
+      TypeError $ "could not find context macro object \"" ++ name ++ "\""
     Just mTyContextMacro -> ExceptT $ Right <$> mTyContextMacro
 
 
@@ -101,10 +107,7 @@ lookupTy tyContextMacro path = lookupTy' tyContextMacro path
 data TypeError
   = TypeError String
   | ParseError P.ParseError
-  deriving (Show, Typeable)
-
-instance Exception TypeError
-
+  deriving (Show)
 
 
 type TypeContext = TypeContextT Identity
@@ -140,8 +143,8 @@ checkExpr ctx (BinaryOp "==" e1 e2) = do
   if t1 == t2
     then pure TyBool
     else throwError $ TypeError $
-         "type of expression " ++ show e1 ++ "(" ++ show t1 ++ ") " ++
-         "does not match that of " ++ show e2 ++ "(" ++ show t2 ++ ")"
+         "type of expression " ++ show e1 ++ " (" ++ show t1 ++ ") " ++
+         "does not match that of " ++ show e2 ++ " (" ++ show t2 ++ ")"
 checkExpr _ (BinaryOp op _ _) =
   throwError $ TypeError $ "unknown binary operation " ++ op
 
