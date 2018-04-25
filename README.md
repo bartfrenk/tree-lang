@@ -10,8 +10,8 @@ types of the context macros (the program elements with prefix `$`) to be
 provided by an external provider.
 
 In the future this repo will include an interpreter that executes programs
-inside a monad that allows for easy dereferencing of remote values (which are
-indicated by a $-prefix). See [project.org](docs/project.org) for sketchy details.
+inside a monad that allows for easy dereferencing of context macros. See
+[project.org](docs/project.org) for sketchy details.
 
 ## Example
 
