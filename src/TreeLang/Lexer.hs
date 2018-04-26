@@ -16,7 +16,7 @@ lexer :: CharStream s => T.GenTokenParser s () Identity
 lexer = T.makeTokenParser style
   where
     ops = ["+", "*", "-", ";", "==", "<", ">", "<=", ">="]
-    names = ["if", "then", "else", "end", "elif"]
+    names = ["if", "then", "else", "end", "elif", "True", "False"]
     style = T.LanguageDef
             { T.commentStart = ""
             , T.commentEnd = ""
@@ -72,3 +72,10 @@ colon = lexeme $ op ":" *> skipMany linebreak
 
 float :: CharStream s => Parser s Double
 float = T.float lexer
+
+bool :: CharStream s => Parser s Bool
+bool = lexeme $ do
+  s <- string "True" <|> string "False"
+  if s == "True"
+    then pure True
+    else pure False

@@ -20,6 +20,7 @@ data Expr
   | IntLiteral Integer
   | StringLiteral String
   | FloatLiteral Double
+  | BoolLiteral Bool
   deriving (Eq)
 
 instance Show Expr where
@@ -28,4 +29,15 @@ instance Show Expr where
   show (IntLiteral i) = show i
   show (StringLiteral s) = "\"" ++ s ++ "\""
   show (FloatLiteral d) = show d
+  show (BoolLiteral b) = show b
+
+data OperatorType
+  = Comparison
+  | Equality
+
+operatorType :: String -> Maybe OperatorType
+operatorType op
+  | op `elem` ["=="] = Just Equality
+  | op `elem` ["<", ">", "<=", ">="] = Just Comparison
+  | otherwise = Nothing
 

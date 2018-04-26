@@ -1,11 +1,10 @@
 {-# LANGUAGE FlexibleContexts #-}
 module TreeLang.Parser (module TreeLang.Parser,
-                        module Text.Parsec) where
+                        runParser) where
 
-import Text.Show.Pretty
 
 import Text.Parsec
-import           Data.Functor.Identity
+import Data.Functor.Identity
 import Text.Parsec.Expr
 
 import TreeLang.Syntax
@@ -24,12 +23,16 @@ stringLiteral = StringLiteral <$> quoted
 floatLiteral :: CharStream s => Parser s Expr
 floatLiteral = FloatLiteral <$> float
 
+boolLiteral :: CharStream s => Parser s Expr
+boolLiteral = BoolLiteral <$> bool
+
 term :: CharStream s => Parser s Expr
 term = parens expr
    <|> contextMacro
    <|> try floatLiteral
    <|> try intLiteral
    <|> try stringLiteral
+   <|> try boolLiteral
    <?> "term"
 
 table :: CharStream s => OperatorTable s () Identity Expr
@@ -74,65 +77,3 @@ cond = do
 
 program :: CharStream s => Parser s Program
 program = sepEndBy1 statement sep
-
-s :: String
-s = unlines
-  ["1 == 2; 3 == $hello",
-   "5"]
-
-t :: String
-t = unlines
-  ["x = 1; y = 2",
-   "z = ($u.w == 1)"]
-
-u :: String
-u = unlines
-  ["if $u.w == 1:",
-   "    x = 2",
-   "    y = 3",
-   "else:",
-   "    z = 5",
-   "end"
-  ]
-
-
-w :: String
-w = unlines
-  ["if $u.w == 1.22:",
-   "    x = 2",
-   "    y = 3",
-   "elif $u.w == 2:",
-   "    if $u.v == 3:",
-   "        z = 4",
-   "    end",
-   "else:",
-   "    z = 5",
-   "end"
-  ]
-
-
-a :: String
-a = unlines
-  ["if $u.w == 1:",
-   "    z = 1",
-   "end"
-  ]
-
-z :: String
-z = unlines
-  ["if $u.w == 1:",
-   "    x = 2",
-   "    y = 3",
-   "elif $u.w == 2.000:",
-   "    z = 4",
-   "else:",
-   "    z = 5",
-   "end"
-  ]
-
-
-pparse :: Show a => Parser String a -> String -> IO ()
-pparse p str =
-  case runParser p () "" str of
-    Left e -> print e
-    Right r -> putStrLn $ ppShow r
