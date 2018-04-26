@@ -9,9 +9,8 @@ The language itself is statically typed, and the type checker allows for the
 types of the context macros (the program elements with prefix `$`) to be
 provided by an external provider.
 
-In the future this repo will include an interpreter that executes programs
-inside a monad that allows for easy dereferencing of context macros. See
-[project.org](docs/project.org) for sketchy details.
+The repository provides an interpreter that executes programs inside a
+monad. This allows for the values of context macros to be externally provided.
 
 ## Example
 

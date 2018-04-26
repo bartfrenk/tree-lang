@@ -4,7 +4,10 @@
 
 * Contents
 ** Roadmap
-*** TODO Add comparison operators to the language
+*** DONE Add comparison operators to the language
+CLOSED: [2018-04-26 Thu 13:42]
+*** DONE Write an interpreter
+CLOSED: [2018-04-26 Thu 13:43]
 *** TODO Add string interpolation
 Maybe use {} interpolation syntax, e.g., "Welcome to {$location.city}!"
 *** DONE Write a typechecker
@@ -12,6 +15,11 @@ CLOSED: [2018-04-24 Tue 23:12]
 We need to have an entry in the type context for all the fields of the context
 macros in the program. Such entries are just trees with the types at the
 leaves.
+*** TODO Write a totality checker
+By this I mean a checker that checks whether every branch of the program has the
+correct assignments.
+*** TODO Deduplicate the assignments that come out of the interpreter
+*** TODO Include position in the error message
 *** Add data constructors
 **** TODO tuples
 **** TODO lists
