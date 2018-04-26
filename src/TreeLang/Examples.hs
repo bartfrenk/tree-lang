@@ -72,17 +72,32 @@ withTypeErrors = unlines
 example :: IO String
 example = readFile "res/example-2.tl"
 
+-- Parsing this misses the second assignment
+minimalParseFailure :: String
+minimalParseFailure = unlines [
+  "x = \"asdas\"",
+  "y = 3"
+  ]
+
+-- while this is parsed successfully
+counterExample1 :: String
+counterExample1 = unlines [
+  "x = \"asdas\";",
+  "y = 3"
+  ]
+
+-- as is this
+counterExample2 :: String
+counterExample2 = unlines [
+  "x = 2",
+  "y = 3"
+  ]
+
 good2 :: String
 good2 = unlines
   ["if $weather.conditions == \"asdas\":",
    "    x = $weather.temperature",
    "    y = 3",
-   "elif $weather.conditions == \"rainy\":",
-   "    if $weather.temperature < 3.0:",
-   "        z = 4",
-   "    end",
-   "else:",
-   "    z = 5",
    "end"
   ]
 

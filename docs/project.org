@@ -23,8 +23,20 @@ correct assignments.
 *** Add data constructors
 **** TODO Add data constructor for tuples
 **** TODO Add data constructor for lists
+** Issues
+*** TODO Separation of statements by linebreaks does not work
+I think this is due to reliance on the Text.Parsec.Token lexer, which considers
+a linebreak white space to be ignored. Needs to be confirmed. See for example
+the programs =minimalParseFailure=, =counterExample1= and =counterExample2= in
+=TreeLang.Examples=.
+
+If my hypothesis is correct, there seem to be two angles of attack for this
+issue:
+1. make use of indent parser, to make the language fully indentation sensitive
+2. write a lexer from scratch (by copy-pasting from Text.Parsec.Token)
 ** Ideas
-*** Haxl interpreter
+*** DONE Haxl interpreter (POC)
+CLOSED: [2018-04-27 Fri 00:55]
 Write an interpreter from programs into the Haxl monad. It would then probably
 be wise to define data sources for every top-level context macro name. The tail
 of the context macro names is then used to access the resulting object.
