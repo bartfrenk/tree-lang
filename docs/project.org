@@ -21,8 +21,8 @@ correct assignments.
 *** TODO Deduplicate the assignments that come out of the interpreter
 *** TODO Include position in the error message
 *** Add data constructors
-**** TODO tuples
-**** TODO lists
+**** TODO Add data constructor for tuples
+**** TODO Add data constructor for lists
 ** Ideas
 *** Haxl interpreter
 Write an interpreter from programs into the Haxl monad. It would then probably
