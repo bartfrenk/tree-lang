@@ -53,7 +53,7 @@ integer :: CharStream s => Parser s Integer
 integer = lexeme (read <$> many1 digit)
 
 op :: CharStream s => String -> Parser s ()
-op s = void $ lexeme $ string s
+op = T.reservedOp lexer
 
 quoted :: CharStream s => Parser s String
 quoted = T.stringLiteral lexer
