@@ -30,7 +30,8 @@ dependencies:
 - pretty-show
 - mtl
 - exceptions
-
+- haxl
+- hashable
 
 library:
   source-dirs: src

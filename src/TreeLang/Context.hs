@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 module TreeLang.Context where
 
@@ -13,16 +14,17 @@ data ContextObj a
   = Atom a
   | Obj (Map Name (ContextObj a))
 
+deriving instance Show a => Show (ContextObj a)
+
 newContextObj :: [(Name, a)] -> ContextObj a
 newContextObj = Obj . fromList . fmap (second Atom)
 
-newContext :: Applicative m => [(Name, ContextObj a)] -> ContextT a m
+newContext :: Applicative m => [(Name, m (ContextObj a))] -> ContextT a m
 newContext =
-  ContextT . fromList . fmap (second pure)
+  ContextT . fromList
 
 data ContextT a m =
   ContextT (Map Name (m (ContextObj a)))
-
 
 lookupObj :: Monad m => ContextT a m -> Name -> ExceptT String m (ContextObj a)
 lookupObj (ContextT ctx) name = case ctx !? name of

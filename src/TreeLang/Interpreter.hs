@@ -1,4 +1,3 @@
-
 module TreeLang.Interpreter
   ( interpretProgram
   , RuntimeError(..)
