@@ -1,5 +1,3 @@
-
-
 if $creative.size == "640x480":
     if $geo.city == "Amsterdam":
         pancake = "amsterdam-pancake.png"
@@ -15,4 +13,4 @@ if $time.part == "evening":
     title = "Good evening"
 else:
     title = "Good day!"
-end;
+end
