@@ -10,6 +10,7 @@ CLOSED: [2018-04-26 Thu 13:42]
 CLOSED: [2018-04-26 Thu 13:43]
 *** TODO Add string interpolation
 Maybe use {} interpolation syntax, e.g., "Welcome to {$location.city}!"
+*** TODO Make the interpreter safer by using GADTs to restrict its output
 *** DONE Write a typechecker
 CLOSED: [2018-04-24 Tue 23:12]
 We need to have an entry in the type context for all the fields of the context
@@ -52,3 +53,29 @@ options given based on the gender.
 
 
 
+*** Make context macros functions
+*Branch:* =feature/add-functions=
+
+This would entail
+
+#+begin_src haskell
+data Expr
+  = ContextMacro [Expr] String
+  ...
+#+end_src
+
+in which the list of expressions are the arguments to the function (it might
+also be a map of expressions, if named arguments are required: I think it is
+better for it to be a map, since that would make it easier to implement generic
+datasources. Just serialize the map to JSON and post it to the supplied resource).
+
+Then the =lookupObj= function would need to return a function from =[Expr]= to
+=(ContextObj Expr)=.
+
+It would now also be better to have GADTs restrict the type of the expression to
+passed in. We could then partition the Expr's into Values and Reducibles, and
+have the Haskell type checker ensure that only values are passed to the
+context macro.
+
+It would now be best to have the type checker to know about functions (with
+named arguments, if arguments to context macros are passed as maps).
