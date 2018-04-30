@@ -1,6 +1,7 @@
 module TreeLang.Syntax where
 
 import Data.List
+import Data.Map.Strict (Map)
 
 type Name = String
 
@@ -15,21 +16,25 @@ data Statement
 
 
 data Expr
-  = ContextMacro [String]
+  = ContextMacro Name
   | BinaryOp Op Expr Expr
   | IntLiteral Integer
   | StringLiteral String
   | FloatLiteral Double
   | BoolLiteral Bool
-  deriving (Eq)
+  | Record (Map Name Expr)
+  | Field Name
+  deriving (Eq, Show)
 
-instance Show Expr where
-  show (ContextMacro path) = "$" ++ intercalate "." path
-  show (BinaryOp op e1 e2) = show e1 ++ " " ++ show op ++ " " ++ show e2
-  show (IntLiteral i) = show i
-  show (StringLiteral s) = "\"" ++ s ++ "\""
-  show (FloatLiteral d) = show d
-  show (BoolLiteral b) = show b
+-- instance Show Expr where
+--   show (ContextMacro name) = "$" ++ name
+--   show (BinaryOp op e1 e2) = show e1 ++ " " ++ show op ++ " " ++ show e2
+--   show (IntLiteral i) = show i
+--   show (StringLiteral s) = "\"" ++ s ++ "\""
+--   show (FloatLiteral d) = show d
+--   show (BoolLiteral b) = show b
+--   show (Record fields) = "Record " ++ show fields
+--   show (Field field) = "Field " ++ field
 
 data OperatorType
   = Comparison

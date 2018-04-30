@@ -8,7 +8,7 @@ import Control.Arrow (left, second)
 import Data.List (intercalate)
 import Data.Map
 
-type Name = String
+import TreeLang.Syntax
 
 data ContextObj a
   = Atom a

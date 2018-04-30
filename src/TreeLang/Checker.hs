@@ -3,7 +3,8 @@ module TreeLang.Checker where
 
 import Data.Functor.Identity
 import Control.Monad.Except
-import qualified Data.Map as Map
+import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 
 import TreeLang.Syntax
 import TreeLang.Context
@@ -16,6 +17,7 @@ data Ty
   | TyBool
   | TyUnit
   | TyFloat
+  | TyRecord (Map Name Ty)
   deriving (Eq)
 
 instance Show Ty where
@@ -77,6 +79,8 @@ checkExpr ctx (BinaryOp op e1 e2) = do
            op ++ " only applies to numeric types"
     Nothing ->
       throwError $ TypeError $ "unknown binary operation " ++ op
+checkExpr ctx (Record fields) =
+  TyRecord <$> (mapM (checkExpr ctx) fields)
 
 isNumeric :: Ty -> Bool
 isNumeric TyFloat = True
