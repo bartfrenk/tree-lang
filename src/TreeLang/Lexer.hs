@@ -67,6 +67,9 @@ sep = void $ skipMany1 $ lexeme $ oneOf ";\n"
 linebreak :: CharStream s => Parser s ()
 linebreak = void $ char '\n'
 
+comma :: CharStream s => Parser s ()
+comma = void $ T.comma lexer
+
 colon :: CharStream s => Parser s ()
 colon = lexeme $ op ":" *> skipMany linebreak
 

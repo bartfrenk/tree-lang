@@ -2,11 +2,12 @@ module TreeLang.Examples where
 
 import Control.Monad.Except
 import Haxl.Core
+import Control.Monad.Identity
 
 import TreeLang.Context
 import TreeLang.Parser
 import TreeLang.Checker
-import TreeLang.Interpreter
+--import TreeLang.Interpreter
 import TreeLang.Syntax
 
 import TreeLang.Haxl
@@ -25,19 +26,35 @@ parse str =
 check :: Monad m => ContextT Ty m -> Program -> ExceptT String m Ty
 check ctx pr = toError unTypeError $ checkProgram ctx pr
 
-interpret :: Monad m => ContextT Expr m -> Program -> ExceptT String m Program
-interpret ctx pr =
-  toError unRuntimeError $ interpretProgram ctx pr
+-- interpret :: Monad m => ContextT Expr m -> Program -> ExceptT String m Program
+-- interpret ctx pr =
+--   toError unRuntimeError $ interpretProgram ctx pr
 
-run :: Monad m => ContextT Ty m -> ContextT Expr m -> String -> ExceptT String m Program
-run tyCtx valCtx s = do
+run :: Monad m => ContextT Ty m -> ContextT Expr m -> String -> ExceptT String m Ty
+run tyCtx _valCtx s = do
   ast <- parse s
-  _ <- check tyCtx ast
-  interpret valCtx ast
+  check tyCtx ast
+  -- interpret valCtx ast
 
-test :: String -> ExceptT String Haxl Program
+test :: String -> ExceptT String Haxl Ty
 test = run tyContext valContext
 
+run' tyCtx s = do
+  ast <- parse s
+  check tyCtx ast
+
+tyContextPure :: ContextT Ty Identity
+tyContextPure = newContext [
+  ( "weather", pure $ newContextObj [
+      ("temperature", TyFloat),
+      ("conditions", TyString)
+      ])]
+
+p :: ContextT Ty Identity
+p = pureTypeContext
+  "weather"
+  [("location", TyString)]
+  [("temperature", TyFloat), ("conditions", TyString)]
 
 haxl :: ExceptT String Haxl a -> IO (Either String a)
 haxl act = do
@@ -57,10 +74,10 @@ valContext = newContext [ ("weather", valWeather)
 
 withTypeErrors :: String
 withTypeErrors = unlines
-  ["if $weather.temperature == 1.0:",
+  ["if $weather.temperature(location=\"asd\") == 1.0:",
    "    x = 2",
    "    y = 3",
-   "elif $weather.conditions == 2:",
+   "elif $weather.conditions(location=\"adssad\" == 2:",
    "    if $u.v == 3:",
    "        z = 4",
    "    end",
@@ -96,18 +113,18 @@ counterExample2 = unlines [
 good2 :: String
 good2 = unlines
   ["if $weather.conditions == \"asdas\":",
-   "    x = $weather.temperature",
+   "    x = $weather.temperature;",
    "    y = 3",
    "end"
   ]
 
 good1 :: String
 good1 = unlines
-  ["if $weather.temperature > 1:",
+  ["if $weather.temperature(location=\"asd\") > 1:",
    "    x = 2",
    "    y = 3",
-   "elif $weather.conditions == \"rainy\":",
-   "    if $weather.temperature >= 0.0:",
+   "elif $weather.conditions(location=\"asdsad\") == \"rainy\":",
+   "    if $weather.temperature(location=\"asdasd\") >= 0.0:",
    "        z = 4",
    "    end",
    "else:",
@@ -124,7 +141,7 @@ prs = unlines
 t :: String
 t = unlines
   ["x = 1; y = 2",
-   "z = ($u.w == 1)"]
+   "z = ($weather.temperature == 1.0)"]
 
 u :: String
 u = unlines

@@ -5,14 +5,26 @@ module TreeLang.Parser (module TreeLang.Parser,
 
 import Text.Parsec
 import Data.Functor.Identity
+import Data.Map.Strict (Map)
+import Data.Map.Strict as Map
 import Text.Parsec.Expr
 
 import TreeLang.Syntax
 import TreeLang.Lexer
 
 
+paramList :: CharStream s => Parser s (Map Name Expr)
+paramList = Map.fromList <$> parens (pair `sepBy` comma)
+        <|> pure Map.empty
+  where pair = do
+          name <- identifier
+          _ <- lexeme $ string "="
+          ex <- expr
+          pure (name, ex)
+
 contextMacro :: CharStream s => Parser s Expr
-contextMacro = ContextMacro <$> (macro *> sepBy1 identifier dot)
+contextMacro =
+  macro *> (ContextMacro <$> sepBy1 identifier dot <*> paramList)
 
 intLiteral :: CharStream s => Parser s Expr
 intLiteral = IntLiteral <$> integer

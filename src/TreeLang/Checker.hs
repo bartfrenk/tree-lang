@@ -3,12 +3,13 @@ module TreeLang.Checker where
 
 import Data.Functor.Identity
 import Control.Monad.Except
-import qualified Data.Map as Map
+import Control.Arrow (second)
+import Data.Map.Strict (Map, (!))
+import qualified Data.Map.Strict as Map
 
 import TreeLang.Syntax
 import TreeLang.Context
 
-import qualified TreeLang.Parser as P
 
 data Ty
   = TyInt
@@ -16,6 +17,7 @@ data Ty
   | TyBool
   | TyUnit
   | TyFloat
+  | TyContextMacro (Map Name Ty) Ty
   deriving (Eq)
 
 instance Show Ty where
@@ -24,7 +26,8 @@ instance Show Ty where
   show TyBool = "bool"
   show TyUnit = "unit"
   show TyFloat = "float"
-
+  show (TyContextMacro params range)
+    = "(" ++ showParams params ++ ") -> " ++ show range
 
 
 type TypeContextT m = ContextT Ty m
@@ -51,15 +54,34 @@ checkStatement ctx (Cond guardedClauses mElseClause) = do
     Nothing -> pure TyUnit
     Just elseClause -> checkProgram ctx elseClause >> pure TyUnit
 
+checkParams :: Monad m
+            => TypeContextT m -> Map Name Ty -> Map Name Expr -> ExceptT TypeError m ()
+checkParams ctx tys exprs = do
+  when (Map.keysSet tys /= Map.keysSet exprs) $
+    throwError $ TypeError $ "parameters do not match"
+  mapM_ (checkKey . fst) (Map.toList tys)
+    where checkKey key =
+            let expr' = exprs ! key
+                ty = tys ! key
+            in do
+              exprTy <- checkExpr ctx expr'
+              when (ty /= exprTy) $ throwError $ TypeError $
+                "type of parameter " ++ key ++ " should be " ++ show ty
+
 checkExpr :: Monad m => TypeContextT m -> Expr -> ExceptT TypeError m Ty
 checkExpr _ (IntLiteral _) = pure TyInt
 checkExpr _ (StringLiteral _) = pure TyString
 checkExpr _ (FloatLiteral _) = pure TyFloat
 checkExpr _ (BoolLiteral _) = pure TyBool
-checkExpr _ (ContextMacro []) = throwError $ TypeError "undefined context macro"
-checkExpr ctx (ContextMacro (name:path)) = toError TypeError $ do
-  tyContextMacro <- lookupObj ctx name
-  lookupAtom tyContextMacro path
+checkExpr _ (ContextMacro [] _) = throwError $ TypeError "undefined context macro"
+checkExpr ctx (ContextMacro (name:path) params) = do
+  tyContextMacro <- toError TypeError $ lookupObj ctx name
+  ty <- toError TypeError $ lookupAtom tyContextMacro path
+  case ty of
+    TyContextMacro t1 t2 -> do
+      checkParams ctx t1 params
+      pure t2
+    t3 -> pure t3
 checkExpr ctx (BinaryOp op e1 e2) = do
   t1 <- checkExpr ctx e1
   t2 <- checkExpr ctx e2
@@ -82,4 +104,14 @@ isNumeric :: Ty -> Bool
 isNumeric TyFloat = True
 isNumeric TyInt = True
 isNumeric _ = False
+
+
+pureTypeContext :: Applicative m
+                => Name -> [(Name, Ty)] -> [(Name, Ty)] -> ContextT Ty m
+pureTypeContext name params fields = newContext
+  [(name, pure $ newContextObj (second arrowType <$> fields))]
+  where
+    params' = Map.fromList params
+    arrowType :: Ty -> Ty
+    arrowType ty = TyContextMacro params' ty
 

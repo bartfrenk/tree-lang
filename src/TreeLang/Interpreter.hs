@@ -37,8 +37,8 @@ interpretExpr ctx (BinaryOp op e1 e2) = do
         _ -> throwError $
              RuntimeError $ "cannot compare " ++ (show e1') ++ " and " ++ (show e2')
     Nothing -> throwError $ RuntimeError $ "unknown operator type " ++ op
-interpretExpr _ (ContextMacro []) = throwError $ RuntimeError "undefined context macro"
-interpretExpr ctx (ContextMacro (name:path)) = do
+interpretExpr _ (ContextMacro [] _) = throwError $ RuntimeError "undefined context macro"
+interpretExpr ctx (ContextMacro (name:path) params) = do
   e <- toError RuntimeError $ do
     obj <- lookupObj ctx name
     lookupAtom obj path
