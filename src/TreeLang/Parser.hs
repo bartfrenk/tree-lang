@@ -35,7 +35,7 @@ term = parens expr
    <|> try stringLiteral
    <|> try boolLiteral
    <|> try record
-   <|> field
+   <|> attributeName
    <?> "term"
 
 table :: CharStream s => OperatorTable s () Identity Expr
@@ -50,8 +50,8 @@ table = [[ Infix (char '.' >> (pure $ BinaryOp ".")) AssocLeft
 expr :: CharStream s => Parser s Expr
 expr = buildExpressionParser table term <?> "expression"
 
-field :: CharStream s => Parser s Expr
-field = Field <$> identifier
+attributeName :: CharStream s => Parser s Expr
+attributeName = AttributeName <$> identifier
 
 assignment :: CharStream s => Parser s Statement
 assignment = do
@@ -64,8 +64,9 @@ statement :: CharStream s => Parser s Statement
 statement = cond <|> assignment <?> "statement"
 
 record :: CharStream s => Parser s Expr
-record = Record . Map.fromList <$> braces (sepBy1 field (sep <|> comma))
-  where field = do
+record = Record . Map.fromList <$> braces
+  (sepBy1 attributeAssignment (sep <|> comma))
+  where attributeAssignment = do
           name <- identifier
           _ <- lexeme $ string "="
           val <- expr

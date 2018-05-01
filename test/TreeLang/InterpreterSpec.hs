@@ -1,5 +1,4 @@
-module TreeLang.CheckerSpec where
-
+module TreeLang.InterpreterSpec where
 
 import Data.Functor.Identity
 import           Test.Hspec
@@ -11,15 +10,11 @@ import           TreeLang.Parser hiding (runParser)
 import           TreeLang.Syntax
 import TreeLang.Checker
 import TreeLang.Context
+import TreeLang.Interpreter
 
 
 pparse :: Parser String a -> String -> Either ParseError a
 pparse p str = P.runParser p () "" str
-
-tyContext :: ContextT Ty Identity
-tyContext = newContext [("u", pure $ newTyRecord [
-                            ("w", TyInt),
-                            ("z", TyString)])]
 
 recordProgram :: String
 recordProgram = unlines
@@ -31,10 +26,13 @@ recordProgram = unlines
    "end"
   ]
 
-
-
+ctx :: ContextT Expr Identity
+ctx = newContext [("u", pure $ newRecord [
+                      ("w", IntLiteral 1),
+                      ("z", StringLiteral "asd")])]
 
 test s = do
   case pparse program s of
     Left e -> error (show e)
-    Right ast -> checkProgram tyContext ast
+    Right ast -> interpretProgram ctx ast
+

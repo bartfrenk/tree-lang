@@ -4,11 +4,13 @@ module TreeLang.Interpreter
   ) where
 
 import Control.Monad.Except
+import Data.Map.Strict ((!?))
 
 import TreeLang.Syntax
 import TreeLang.Context
 
 data RuntimeError = RuntimeError { unRuntimeError :: String }
+  deriving (Show)
 
 type InterpreterT m a = ExceptT RuntimeError m a
 
@@ -36,13 +38,22 @@ interpretExpr ctx (BinaryOp op e1 e2) = do
           pure $ BoolLiteral (d1 `f` d2)
         _ -> throwError $
              RuntimeError $ "cannot compare " ++ (show e1') ++ " and " ++ (show e2')
+    Just AttributeAccess ->
+      case (e1', e2') of
+        (Record attrs, AttributeName name) ->
+          maybe (throwError $ RuntimeError $
+                 "record " ++ show e1' ++ " has no attribute " ++ show e2)
+                pure (attrs !? name)
+        _ ->
+          throwError $ RuntimeError $ "cannot access " ++ show e1' ++ " by " ++ show e2'
     Nothing -> throwError $ RuntimeError $ "unknown operator type " ++ op
 interpretExpr _ (ContextMacro []) = throwError $ RuntimeError "undefined context macro"
-interpretExpr ctx (ContextMacro (name:path)) = do
-  e <- toError RuntimeError $ do
-    obj <- lookupObj ctx name
-    lookupAtom obj path
-  interpretExpr ctx e
+interpretExpr ctx (ContextMacro name) = do
+  (toError RuntimeError $ lookupObj ctx name) >>= interpretExpr ctx
+interpretExpr _ e@(AttributeName _) = pure e
+interpretExpr ctx (Record attrs) =
+  Record <$> (mapM (interpretExpr ctx) attrs)
+
 
 interpretStatement :: Monad m => ContextT Expr m -> Statement -> InterpreterT m Program
 interpretStatement ctx (Assignment name expr) = do

@@ -1,7 +1,7 @@
 module TreeLang.Syntax where
 
-import Data.List
 import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as Map
 
 type Name = String
 
@@ -23,8 +23,11 @@ data Expr
   | FloatLiteral Double
   | BoolLiteral Bool
   | Record (Map Name Expr)
-  | Field Name
+  | AttributeName Name
   deriving (Eq, Show)
+
+newRecord :: [(Name, Expr)] -> Expr
+newRecord = Record . Map.fromList
 
 -- instance Show Expr where
 --   show (ContextMacro name) = "$" ++ name
@@ -39,10 +42,12 @@ data Expr
 data OperatorType
   = Comparison
   | Equality
+  | AttributeAccess
 
 operatorType :: String -> Maybe OperatorType
 operatorType op
   | op `elem` ["=="] = Just Equality
   | op `elem` ["<", ">", "<=", ">="] = Just Comparison
+  | op == "." = Just AttributeAccess
   | otherwise = Nothing
 
