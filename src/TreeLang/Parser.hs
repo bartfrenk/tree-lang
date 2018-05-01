@@ -7,13 +7,26 @@ import Text.Parsec
 import Data.Functor.Identity
 import Text.Parsec.Expr
 import qualified Data.Map.Strict as Map
+import Data.Map.Strict (Map)
 
 import TreeLang.Syntax
 import TreeLang.Lexer
 
 
+attributeList :: CharStream s => Parser s (Map Name Expr)
+attributeList = Map.fromList <$> (sepBy attributeAssignment (sep <|> comma))
+  where attributeAssignment = do
+          name <- identifier
+          _ <- lexeme $ string "="
+          val <- expr
+          pure (name, val)
+
 contextMacro :: CharStream s => Parser s Expr
-contextMacro = ContextMacro <$> (macro *> identifier)
+contextMacro = do
+  macro
+  name <- identifier
+  params <- Record <$> (parens attributeList <|> pure Map.empty)
+  pure $ ContextMacro name params
 
 intLiteral :: CharStream s => Parser s Expr
 intLiteral = IntLiteral <$> integer
@@ -64,13 +77,7 @@ statement :: CharStream s => Parser s Statement
 statement = cond <|> assignment <?> "statement"
 
 record :: CharStream s => Parser s Expr
-record = Record . Map.fromList <$> braces
-  (sepBy1 attributeAssignment (sep <|> comma))
-  where attributeAssignment = do
-          name <- identifier
-          _ <- lexeme $ string "="
-          val <- expr
-          pure (name, val)
+record = Record <$> braces attributeList
 
 cond :: CharStream s => Parser s Statement
 cond = do

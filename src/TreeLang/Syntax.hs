@@ -29,6 +29,10 @@ data Expr
 newRecord :: [(Name, Expr)] -> Expr
 newRecord = Record . Map.fromList
 
+isNullRecord :: Expr -> Bool
+isNullRecord (Record attrs) = Map.null attrs
+isNullRecord _ = False
+
 -- instance Show Expr where
 --   show (ContextMacro name) = "$" ++ name
 --   show (BinaryOp op e1 e2) = show e1 ++ " " ++ show op ++ " " ++ show e2
