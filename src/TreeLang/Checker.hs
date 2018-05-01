@@ -5,12 +5,23 @@ import Data.Functor.Identity
 import Control.Monad.Except
 import Data.Map.Strict (Map, (!?))
 import qualified Data.Map.Strict as Map
-import Data.Maybe
 
 import TreeLang.Syntax
-import TreeLang.Context
 
-import qualified TreeLang.Parser as P
+data TyContextT m =
+  TyContextT (Map Name (m Ty))
+
+newTyContext :: [(Name, m Ty)] -> TyContextT m
+newTyContext = TyContextT . Map.fromList
+
+emptyTypeContext :: TyContextT Identity
+emptyTypeContext = TyContextT Map.empty
+
+lookupTy :: Monad m => TyContextT m -> Name -> ExceptT TypeError m Ty
+lookupTy (TyContextT ctx) name = case ctx !? name of
+    Nothing -> throwError $ TypeError $ "could not find context object \"" ++ name ++ "\""
+    Just obj -> ExceptT $ Right <$> obj
+
 
 data Ty
   = TyInt
@@ -19,22 +30,24 @@ data Ty
   | TyUnit
   | TyFloat
   | TyRecord (Map Name Ty)
+  | TyFunction Ty Ty
   deriving (Eq, Show)
 
 newTyRecord :: [(Name, Ty)] -> Ty
 newTyRecord = TyRecord . Map.fromList
 
+isNullTyRecord :: Ty -> Bool
+isNullTyRecord (TyRecord attrs) = Map.null attrs
+isNullTyRecord _ = False
+
 data TypeError
   = TypeError { unTypeError :: String }
   deriving (Show)
 
-emptyTypeContext :: ContextT Ty Identity
-emptyTypeContext = ContextT Map.empty
-
-checkProgram :: Monad m => ContextT Ty m -> Program -> ExceptT TypeError m Ty
+checkProgram :: Monad m => TyContextT m -> Program -> ExceptT TypeError m Ty
 checkProgram ctx program = last <$> forM program (checkStatement ctx)
 
-checkStatement :: Monad m => ContextT Ty m -> Statement -> ExceptT TypeError m Ty
+checkStatement :: Monad m => TyContextT m -> Statement -> ExceptT TypeError m Ty
 checkStatement ctx (Assignment _ expr) = checkExpr ctx expr >> pure TyUnit
 checkStatement ctx (Cond guardedClauses mElseClause) = do
   forM_ guardedClauses $ \(gd, pr) -> do
@@ -46,13 +59,25 @@ checkStatement ctx (Cond guardedClauses mElseClause) = do
     Nothing -> pure TyUnit
     Just elseClause -> checkProgram ctx elseClause >> pure TyUnit
 
-checkExpr :: Monad m => ContextT Ty m -> Expr -> ExceptT TypeError m Ty
+checkExpr :: Monad m => TyContextT m -> Expr -> ExceptT TypeError m Ty
 checkExpr _ (IntLiteral _) = pure TyInt
 checkExpr _ (StringLiteral _) = pure TyString
 checkExpr _ (FloatLiteral _) = pure TyFloat
 checkExpr _ (BoolLiteral _) = pure TyBool
-checkExpr _ (ContextMacro []) = throwError $ TypeError "undefined context macro"
-checkExpr ctx (ContextMacro name) = toError TypeError $ lookupObj ctx name
+checkExpr ctx e@(ContextMacro name params) = do
+  t1 <- checkExpr ctx params
+  t2 <- lookupTy ctx name
+  case (t1, t2) of
+    (TyRecord _, TyFunction dom range) ->
+      if t1 == dom then pure range
+      else throwError $ TypeError $
+             "expr " ++ show e ++ " expects argument of type " ++ show dom
+    (TyRecord _, _) ->
+      if isNullTyRecord t1 then pure t2
+      else throwError $ TypeError $
+           "expr " ++ show e ++ " does not expect arguments"
+    (_, _) -> throwError $ TypeError $
+                "expr " ++ show e ++ " requires named arguments" ++ show t1
 checkExpr ctx (BinaryOp op e1 e2) = do
   t1 <- checkExpr ctx e1
   t2 <- checkExpr ctx e2
