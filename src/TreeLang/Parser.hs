@@ -6,13 +6,14 @@ module TreeLang.Parser (module TreeLang.Parser,
 import Text.Parsec
 import Data.Functor.Identity
 import Text.Parsec.Expr
+import qualified Data.Map.Strict as Map
 
 import TreeLang.Syntax
 import TreeLang.Lexer
 
 
 contextMacro :: CharStream s => Parser s Expr
-contextMacro = ContextMacro <$> (macro *> sepBy1 identifier dot)
+contextMacro = ContextMacro <$> (macro *> identifier)
 
 intLiteral :: CharStream s => Parser s Expr
 intLiteral = IntLiteral <$> integer
@@ -33,18 +34,24 @@ term = parens expr
    <|> try intLiteral
    <|> try stringLiteral
    <|> try boolLiteral
+   <|> try record
+   <|> field
    <?> "term"
 
 table :: CharStream s => OperatorTable s () Identity Expr
-table = [[ Infix (op "==" >> (pure $ BinaryOp "==")) AssocNone
-         , Infix (op "<" >> (pure $ BinaryOp "<")) AssocNone
-         , Infix (op ">" >> (pure $ BinaryOp ">")) AssocNone
-         , Infix (op "<=" >> (pure $ BinaryOp "<=")) AssocNone
-         , Infix (op ">=" >> (pure $ BinaryOp ">=")) AssocNone
+table = [[ Infix (char '.' >> (pure $ BinaryOp ".")) AssocLeft
+         , Infix (op "==" >> (pure $ BinaryOp "==")) AssocLeft
+         , Infix (op "<" >> (pure $ BinaryOp "<")) AssocLeft
+         , Infix (op ">" >> (pure $ BinaryOp ">")) AssocLeft
+         , Infix (op "<=" >> (pure $ BinaryOp "<=")) AssocLeft
+         , Infix (op ">=" >> (pure $ BinaryOp ">=")) AssocLeft
          ]]
 
 expr :: CharStream s => Parser s Expr
 expr = buildExpressionParser table term <?> "expression"
+
+field :: CharStream s => Parser s Expr
+field = Field <$> identifier
 
 assignment :: CharStream s => Parser s Statement
 assignment = do
@@ -55,6 +62,14 @@ assignment = do
 
 statement :: CharStream s => Parser s Statement
 statement = cond <|> assignment <?> "statement"
+
+record :: CharStream s => Parser s Expr
+record = Record . Map.fromList <$> braces (sepBy1 field (sep <|> comma))
+  where field = do
+          name <- identifier
+          _ <- lexeme $ string "="
+          val <- expr
+          pure (name, val)
 
 cond :: CharStream s => Parser s Statement
 cond = do
