@@ -79,6 +79,18 @@ recordProgram = unlines
    "end"
   ]
 
+recordProgram2 :: String
+recordProgram2 = unlines
+  ["if $u(s=1, t=$bla.x).w == 1:",
+   "    x = {};",
+   "    y = 3",
+   "else:",
+   "    z = 5",
+   "end"
+  ]
+
+
+
 fieldProgram :: String
 fieldProgram = unlines
   ["$weather.temperature > 1.0"]

@@ -16,7 +16,7 @@ data Statement
 
 
 data Expr
-  = ContextMacro Name
+  = ContextMacro Name Expr
   | BinaryOp Op Expr Expr
   | IntLiteral Integer
   | StringLiteral String
@@ -28,6 +28,10 @@ data Expr
 
 newRecord :: [(Name, Expr)] -> Expr
 newRecord = Record . Map.fromList
+
+isNullRecord :: Expr -> Bool
+isNullRecord (Record attrs) = Map.null attrs
+isNullRecord _ = False
 
 -- instance Show Expr where
 --   show (ContextMacro name) = "$" ++ name

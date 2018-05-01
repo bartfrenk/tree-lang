@@ -19,7 +19,10 @@ pparse p str = P.runParser p () "" str
 tyContext :: ContextT Ty Identity
 tyContext = newContext [("u", pure $ newTyRecord [
                             ("w", TyInt),
-                            ("z", TyString)])]
+                            ("z", TyString)]),
+                        ("f", pure $ TyFunction
+                          (newTyRecord [("x", TyInt)])
+                          (newTyRecord [("y", TyInt)]))]
 
 recordProgram :: String
 recordProgram = unlines
@@ -30,6 +33,17 @@ recordProgram = unlines
    "    z = 5",
    "end"
   ]
+
+recordProgram2 :: String
+recordProgram2 = unlines
+  ["if $f(x=$u.z).y == 1:",
+   "    x = { bar = 1, foo = \"baz\" };",
+   "    y = 3",
+   "else:",
+   "    z = 5",
+   "end"
+  ]
+
 
 
 
