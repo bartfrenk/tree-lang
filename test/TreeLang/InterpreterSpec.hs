@@ -26,10 +26,10 @@ recordProgram = unlines
    "end"
   ]
 
-ctx :: ContextT Expr Identity
-ctx = newContext [("u", pure $ newRecord [
-                      ("w", IntLiteral 1),
-                      ("z", StringLiteral "asd")])]
+ctx :: ExprContextT Identity
+ctx = newExprContext [("u", \_ -> pure $ newRecord [
+                        ("w", IntLiteral 1),
+                        ("z", StringLiteral "asd")])]
 
 test s = do
   case pparse program s of
