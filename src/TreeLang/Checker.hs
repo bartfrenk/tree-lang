@@ -19,7 +19,7 @@ emptyTypeContext = TyContextT Map.empty
 
 lookupTy :: Monad m => TyContextT m -> Name -> ExceptT TypeError m Ty
 lookupTy (TyContextT ctx) name = case ctx !? name of
-    Nothing -> throwError $ TypeError $ "could not find context object \"" ++ name ++ "\""
+    Nothing -> throwError $ TypeError $ "could not find context object " ++ name
     Just obj -> ExceptT $ Right <$> obj
 
 
