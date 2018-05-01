@@ -16,7 +16,7 @@ data Statement
 
 
 data Expr
-  = ContextMacro Name
+  = ContextMacro Name Expr
   | BinaryOp Op Expr Expr
   | IntLiteral Integer
   | StringLiteral String
