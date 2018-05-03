@@ -118,6 +118,7 @@ number of features not yet available.
 - local variables (e.g. group)
 - string interpolation
 - reference types (i.e., those starting with @)
+- lists
 
 #+BEGIN_SRC python
 # This is an example of what a tree-lang program could eventually look like.
