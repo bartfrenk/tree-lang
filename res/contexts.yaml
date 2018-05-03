@@ -1,0 +1,18 @@
+
+contexts:
+  location:
+    type:
+      city: string
+      country: string
+      countryCode: string
+    value: http://www.location-service.com/
+  weather:
+    type:
+      function:
+        domain:
+          city: string
+          countryCode: string
+        range:
+          temperature: float
+          condition: string
+    value: http://www.weather-service.com/
