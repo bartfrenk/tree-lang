@@ -10,7 +10,6 @@ CLOSED: [2018-04-26 Thu 13:42]
 CLOSED: [2018-04-26 Thu 13:43]
 *** TODO Add string interpolation
 Maybe use {} interpolation syntax, e.g., "Welcome to {$location.city}!"
-*** TODO Make the interpreter safer by using GADTs to restrict its output
 *** DONE Write a typechecker
 CLOSED: [2018-04-24 Tue 23:12]
 We need to have an entry in the type context for all the fields of the context
@@ -43,6 +42,7 @@ be wise to define data sources for every top-level context macro name. The tail
 of the context macro names is then used to access the resulting object.
 
 This would allow for easy concurrent data access.
+*** Make the interpreter safer by using GADTs to restrict its output
 *** What about failures to dereference context macros?
 The language should have a good concept of unknowns. Dereferencing the context
 macros might fail.
@@ -51,9 +51,8 @@ This is very preliminary. I am thinking of something like =title = [{"Welcome!",
 "Hey!"}|gender]=, to automatically select the title from the two
 options given based on the gender.
 
-
-
-*** Make context macros functions
+*** DONE Make context macros functions
+CLOSED: [2018-05-03 Thu 11:59]
 *Branch:* =feature/add-functions=
 
 This would entail
@@ -79,3 +78,90 @@ context macro.
 
 It would now be best to have the type checker to know about functions (with
 named arguments, if arguments to context macros are passed as maps).
+*** Is is useful to consider the specification of context objects as configuration?
+If so, how can we specify them as YAML for instance.
+Pros:
+- For some it might be necessary, e.g., ad-hoc bandit context objects, and for
+  others it isn't, e.g. weather, location.
+Cons:
+-
+*** How to deal with raw context objects?
+For istance, stuff that comes out of the request. I think the best thing would
+be to treat them on the same level as other context objects. So maybe something like,
+=$request.ip_address=, =$request.user_agent= are valid context objects.
+
+** Context objects
+*** Fixed context objects
+Types only change when releasing context services.
+**** weather
+**** location
+**** locale
+**** request
+**** creative
+**** turbine
+**** time
+**** device
+**** random[A=10, B=1, C=9]
+*** Ad-hoc context objects
+Change dynamically.
+**** product[selector-identifier]($time.part_of_day)
+
+
+** Example programs
+We use Python syntax highlighting for tree-lang, since the syntax is meant to be similar.
+*** Complicated program
+This is a program that we eventually should be able to execute. It requires a
+number of features not yet available.
+
+- placeholder declarations (with types)
+- random choice as a context object
+- local variables (e.g. group)
+- string interpolation
+- reference types (i.e., those starting with @)
+
+#+BEGIN_SRC python
+# This is an example of what a tree-lang program could eventually look like.
+# To evaluate it, the interpreter expects the following objects to be in context:
+# weather, product[most_clicked], product[most_seen], random, selector[cta_per_day].
+#
+# To reduce the possibility of mistakes we need:
+#
+# - good previews
+#
+# - a type checker with dynamically provided types (at least for the ad-hoc
+#   context objects, such as product[most_clicked].
+
+placeholder pancake: image = @default_pancake
+placeholder title: text = "Default title"
+placeholder cta: text = "Default CTA"
+placeholder background: image = @"background-{$creative.size}"
+placeholder cube: image[] = [@generic_product]
+placeholder color: color = $template.placeholder.color
+
+group = random[A=1, B=1, C=1].value
+
+if group == "A":
+
+   if $weather.condition in ["rainy", "cloudy"]:
+      pancake = @rainy_background
+      cube = product[most_clicked]($turbine.segment, $weather.condition, limit=2) + \
+             product[most_seen]($turbine.segment, limit=2)
+
+      if $device.touch_screen:
+         cta = "Tap me"
+      else:
+         cta = selector[cta_per_day_part]($time.cta_per_day_part)
+      end
+   else:
+      pancake = @sunny_background
+   end
+
+elif group == "B":
+
+   title = "Our most generic product"
+   cta = "Buy me!"
+
+end
+#+END_SRC
+
+
