@@ -19,7 +19,7 @@ monad. This allows for the values of context macros to be externally provided.
 
 ## Example
 
-This example does not run it. It is an indication of where to project is going.
+This example does not run yet. It is an indication of where to project is going.
 
 ```
 placholder title: text
