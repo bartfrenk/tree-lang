@@ -23,7 +23,7 @@ placeholder pancake: image
 if $creative.size == (640, 480):
     if $geo.city == "Amsterdam":
         if $weather.temperature > 20:
-            pancake = "amsterdam-pancake.png";
+            pancake = "amsterdam-pancake.png"
             title = "Summer in Amsterdam!"
         end
     elif $geo.city == "Paris":
