@@ -5,6 +5,11 @@
 A (non-Turing complete) language for describing decision trees, with syntax
 similar to Python. Loosely inspired by AppNexus' Bonsai language.
 
+The language has a few design goals:
+- It should be simple and intuitive to use for people with some exposure to
+  Python,
+- It should be difficult to write programs that fail.
+
 The language itself is statically typed, and the type checker allows for the
 types of the context macros (the program elements with prefix `$`) to be
 provided by an external provider.
