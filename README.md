@@ -14,11 +14,16 @@ monad. This allows for the values of context macros to be externally provided.
 
 ## Example
 
+This example does not run it. It is an indication of where to project is going.
+
 ```
-if $creative.size == "640x480":
+placholder title: text
+placeholder pancake: image
+
+if $creative.size == (640, 480):
     if $geo.city == "Amsterdam":
         if $weather.temperature > 20:
-            pancake = "amsterdam-pancake.png"
+            pancake = "amsterdam-pancake.png";
             title = "Summer in Amsterdam!"
         end
     elif $geo.city == "Paris":
